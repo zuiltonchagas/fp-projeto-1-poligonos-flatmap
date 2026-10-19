@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 /// Uma aplicação desktop (usando a biblioteca [OpenJFX (JavaFX)](http://openjfx.io))
@@ -82,16 +83,8 @@ public class PoligonosApp extends Application {
         final var root = new Pane();
         final var scene = new Scene(root, 800, 600);
 
-        for (final var listaPontos : pontosPoligonos) {
-            final var poligono = new Polygon();
-            for (final Point point : listaPontos) {
-                poligono.getPoints().addAll(point.x(), point.y());
-            }
-
-            poligono.setFill(Color.BLUE);
-            poligono.setStroke(Color.BLACK);
-            root.getChildren().add(poligono);
-        }
+        final List<Polygon> poligonos = pontosPoligonos.stream().map(PoligonosApp::newPolygon).toList();
+        root.getChildren().addAll(poligonos);
 
         final List<String> perimetros = perimetros().stream().map(p -> String.format("%.1f", p)).toList();
         final var label1 = newLabel("Perímetro dos Polígonos: " + perimetros, 500);
@@ -102,6 +95,16 @@ public class PoligonosApp extends Application {
         mainStage.setScene(scene);
         mainStage.setAlwaysOnTop(true);
         mainStage.show();
+    }
+
+    private static Polygon newPolygon(final List<Point> pontos) {
+        final double[] coordenadas = pontos.stream()
+                .flatMapToDouble(p -> DoubleStream.of(p.x(), p.y()))
+                .toArray();
+        final var poligono = new Polygon(coordenadas);
+        poligono.setFill(Color.BLUE);
+        poligono.setStroke(Color.BLACK);
+        return poligono;
     }
 
     private static Label newLabel(final String title, final int y) {
