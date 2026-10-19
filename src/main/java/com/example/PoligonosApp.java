@@ -170,8 +170,10 @@ public class PoligonosApp extends Application {
     ///
     /// @return uma lista contendo o perímetro de cada polígono
     protected List<Double> perimetros(){
-        // TODO Apague esta linha e a próxima e implemente seu código
-        return List.of();
+        return pontosPoligonos.stream()
+                .flatMap(pontos -> Stream.of(pontos.stream().reduce(pontos.getLast(), Point::new)))
+                .map(Point::distance)
+                .toList();
     }
 }
 
